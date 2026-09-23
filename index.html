@@ -1,53 +1,83 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>The Room — Interactive Descent</title>
-  <style>
-    :root { --bg:#07060a; --ink:#f4e9ef; --muted:#b9a3b0; --accent:#e8a0b8; --line:rgba(232,160,184,0.28); }
-    * { box-sizing: border-box; }
-    html, body { margin:0; min-height:100%; background:radial-gradient(1200px 600px at 20% -10%, rgba(196,92,122,0.18), transparent 55%), var(--bg); color:var(--ink); font-family:Georgia,serif; }
-    body { padding:20px 16px 48px; }
-    .wrap { max-width:760px; margin:0 auto; }
-    header.app { display:flex; justify-content:space-between; align-items:flex-end; gap:12px; margin-bottom:18px; border-bottom:1px solid var(--line); padding-bottom:12px; }
-    header.app h1 { font-size:1.15rem; letter-spacing:0.14em; text-transform:uppercase; margin:0; color:var(--accent); }
-    header.app p { margin:4px 0 0; font-size:0.78rem; color:var(--muted); }
-    .tools button { font-family:system-ui,sans-serif; font-size:0.72rem; letter-spacing:0.06em; text-transform:uppercase; background:transparent; color:var(--muted); border:1px solid var(--line); border-radius:999px; padding:6px 10px; cursor:pointer; }
-    .tools button[aria-pressed="true"] { color:var(--ink); border-color:var(--accent); }
-    .card { background:#1a141f; border:1px solid var(--line); border-radius:18px; padding:22px; }
-    .kicker { font-family:system-ui,sans-serif; font-size:0.7rem; letter-spacing:0.16em; text-transform:uppercase; color:var(--accent); margin:0 0 10px; }
-    .story { font-size:1.05rem; line-height:1.65; white-space:pre-wrap; }
-    .choices { display:grid; gap:10px; margin-top:18px; }
-    .choices button { text-align:left; font-family:Georgia,serif; font-size:0.98rem; color:var(--ink); background:#221823; border:1px solid var(--line); border-radius:12px; padding:12px 14px; cursor:pointer; }
-    .choices button span { display:block; font-family:system-ui,sans-serif; font-size:0.68rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--accent); margin-bottom:4px; }
-    .note,.progress { font-family:system-ui,sans-serif; font-size:0.78rem; color:var(--muted); margin-top:12px; }
-    .static-layer { pointer-events:none; position:fixed; inset:0; opacity:0; transition:opacity 1.6s ease; background:repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0 1px, transparent 1px 3px); mix-blend-mode:overlay; }
-    body.static-on .static-layer { opacity:0.22; }
-    body.safe .static-layer { display:none; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The Room — Choose Your Own Adventure</title>
+<style>
+:root{--bg:#07060a;--ink:#f4e9ef;--muted:#b9a3b0;--accent:#e8a0b8;--line:rgba(232,160,184,.35)}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:radial-gradient(900px 500px at 10% -10%,rgba(196,92,122,.2),transparent 55%),#07060a;color:var(--ink);font-family:Georgia,serif}
+body{padding:20px 16px 48px}
+.wrap{max-width:760px;margin:0 auto}
+header.app{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:16px;border-bottom:1px solid var(--line);padding-bottom:12px}
+header.app h1{margin:0;font-size:1.2rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+header.app p{margin:4px 0 0;font-size:.8rem;color:var(--muted)}
+.tools button{font-family:system-ui,sans-serif;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;background:transparent;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:6px 10px;cursor:pointer}
+.card{background:#1a141f;border:1px solid var(--line);border-radius:16px;padding:22px}
+.kicker{font-family:system-ui,sans-serif;font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin:0 0 10px}
+.story{font-size:1.05rem;line-height:1.65;white-space:pre-wrap}
+.choices{display:grid;gap:10px;margin-top:18px}
+.choices button{text-align:left;font-family:Georgia,serif;font-size:1rem;line-height:1.4;color:var(--ink);background:#221823;border:1px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer;width:100%}
+.choices button:hover{border-color:var(--accent)}
+.choices button b{display:block;font-family:system-ui,sans-serif;font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:4px}
+.note{font-family:system-ui,sans-serif;font-size:.78rem;color:var(--muted);margin-top:14px}
+</style>
 </head>
 <body>
-  <div class="static-layer"></div>
-  <div class="wrap">
-    <header class="app">
-      <div>
-        <h1>The Room</h1>
-        <p>A choose-your-own descent • adult • looping</p>
-      </div>
-      <div class="tools">
-        <button type="button" id="safeBtn" aria-pressed="false">Seizure-safe</button>
-        <button type="button" id="restartBtn">Restart</button>
-      </div>
-    </header>
-    <div class="card">
-      <p class="kicker" id="kicker">Prologue</p>
-      <div class="story" id="story"></div>
-      <div class="choices" id="choices"></div>
-      <p class="progress" id="progress"></p>
-      <p class="note" id="note"></p>
-    </div>
-  </div>
-  <script src="https://cdn.jsdelivr.net/gh/kevo10d/the-room-interactive@main/app.js"></script>
+<div class="wrap">
+<header class="app">
+<div><h1>The Room</h1><p>Choose your own adventure</p></div>
+<div class="tools"><button type="button" id="restartBtn">Restart</button></div>
+</header>
+<div class="card">
+<p class="kicker" id="kicker">Loading</p>
+<div class="story" id="story">Open this file in a browser. Buttons should appear below.</div>
+<div class="choices" id="choices"></div>
+<p class="note" id="note">Tap a button to choose the next scene.</p>
+</div>
+</div>
+<script>
+const S={
+start:{k:"Start",t:"You are Kevin.\n\nShilpa's room. Leia Ryan by the window. Olivia Kenny and Olivia Holt talking. Aisling and Sadbh on the bed. Aimee has a phone and does not get fucked. She only films.\n\nThe door opens. Shilpa walks in wearing a trench coat. She starts unbuttoning.\n\nTap a choice. That is the whole game.",c:[["Watch her take the coat off","unbutton"],["Skip ahead to the sex","full"]]},
+unbutton:{k:"The unbuttoning",t:"Click. Click. Click.\n\nThe coat hits the floor. Shilpa tears the outfits off. Scraps everywhere. She looks at you like the texts were a contract. She is already lubed.",c:[["Full path — every act, every girl but Aimee","full"],["Stay inside Shilpa first","shilpa"],["Let the two Olivias take you first","olivias"],["Jump to the five-month loop","months"]]},
+shilpa:{k:"Shilpa",t:"Shilpa climbs into your lap and sinks onto your dick. Over-lubed. Hot. Open. She rides until your name breaks in her mouth.\n\nLeia comes off the window with a strap-on and a toy. She works the toy into Shilpa's ass beside you until Shilpa is stuffed and inaudible.\n\nOlivia Kenny sucks you when Shilpa lifts. Olivia Holt kisses Kenny and takes you next. They swap you in and out of Shilpa.\n\nAimee films. She does not get fucked.",c:[["Shilpa comes. Pass her cum around.","swap"],["Get rougher. Fist and ass-to-mouth.","rough"],["Back to the coat","unbutton"]]},
+full:{k:"Full descent",t:"You take all of it in one line.\n\nShilpa rides you. Leia straps her and adds a toy. Kenny and Holt swap your cock between their throats and Shilpa's hole.\n\nShilpa comes on you. The girls pass that wetness mouth to mouth: Kenny, Holt, Leia, Aisling, Sadbh, back to Shilpa.\n\nYou fist her. Ass-to-mouth. You come in her. They pass that too.\n\nThen they rotate you onto every girl except Aimee.",c:[["Do the rotation now","rotation"],["Stay on the cum-swap rule","swap"],["Five months in the same room","months"]]},
+swap:{k:"The swap rule",t:"Rule of the room: whatever comes out of Shilpa gets passed. Whatever you put in her gets passed.\n\nKenny licks it off the place you are joined. Holt takes it from Kenny's mouth. They feed Shilpa her own orgasm. Then Leia. Then Aisling. Then Sadbh.\n\nAimee keeps the phone on their mouths.",c:[["Make it meaner","rough"],["Fuck every other girl","rotation"],["Film it and make Kevin watch it back","film"]]},
+rough:{k:"Rougher",t:"More lube. Second toy beside the strap. You fist Shilpa until she is open and swearing into Kenny's mouth.\n\nAss-to-mouth: Shilpa licks you clean while Leia holds her open. Holt tells you to look.\n\nYou come in her. They pass it down the line again.",c:[["The Olivias own you next","olivias"],["Rotation — every girl but Aimee","rotation"],["Watch the video Aimee just shot","film"]]},
+olivias:{k:"Kenny and Holt",t:"Olivia Kenny sits on your face. Olivia Holt rides your dick. They switch without asking.\n\nBeside the bed Shilpa is still getting the strap and the toy from Leia so you have to hear her while the Olivias use you.\n\nPhone in your hand. Aimee says stay on Shilpa's mouth.",c:[["Rotation next","rotation"],["Back inside Shilpa","shilpa"],["Five-month Tuesday","months"]]},
+rotation:{k:"Everyone but Aimee",t:"OLIVIA KENNY — mouth, pussy, ass, strap, fist. She comes. They swap it. You come in her. Shilpa kisses it out of her.\n\nOLIVIA HOLT — same map. You and Leia in her at once.\n\nLEIA — you take the strap off her and use her throat, cunt, ass. Shilpa fists her.\n\nAISLING — mouth, cunt, ass, strap, fist.\n\nSADBH — every hole, fist, two toys, ass-to-mouth.\n\nAimee only films.",c:[["Let weeks flatten","months"],["Meaner version of the same rotation","mean"],["Start the next cycle on Leia instead","leiafirst"]]},
+film:{k:"Watch it back",t:"Aimee puts the phone in your face. Shilpa stuffed, shiny, passing cum down the line, telling you to jack off to this later.\n\nYou are still in the room. Still wet. They do not pause the live version while you watch the recorded one.",c:[["Keep going live","rotation"],["Five months of this being normal","months"],["End in static","static"]]},
+months:{k:"Five months",t:"No clean morning after. Clothes still on the floor. Dead phones except Aimee's.\n\nA Tuesday is Shilpa on your face with a lubed ass, Leia already strapped, Kenny and Holt arguing with full mouths over who swallows first, Aisling and Sadbh already open.\n\nEvery girl but Aimee, every way, again. Swap after every orgasm. Film it. Repeat.",c:[["Voices smear. Static.","static"],["Run a meaner month","mean"],["Reset to the coat and choose again","unbutton"]]},
+mean:{k:"Meaner loop",t:"Longer fisting. Two toys and a strap and you. Ass-to-mouth after every ass. Aimee makes you watch the replay while you are still inside whoever just came.\n\nThe swap is enforced. Shilpa slurs film it, make him watch it over and over.",c:[["Static","static"],["Leia-first order next cycle","leiafirst"],["Same order again, Shilpa first","full"]]},
+leiafirst:{k:"Leia first",t:"This cycle starts on Leia. Throat, cunt, ass, fist, toy.\n\nThen Kenny. Then Holt. Then Aisling. Then Sadbh.\n\nShilpa last. She rides you with the whole room already in her mouth. They pass her orgasm at the end like a seal. Aimee zooms the swallow.",c:[["Do that cycle again","leiafirst"],["Back to Shilpa first","full"],["Sit in the white noise","static"]]},
+static:{k:"Static and white noise",t:"The hum under the boards climbs. Names smear. The last clear picture is Shilpa on you, kissing Holt with a mouth full of mixed cum, Aimee's phone still up.\n\nThen hiss. White noise. No separate bodies.\n\nYou can stay here, or the coat can come back and you choose again.",c:[["Stay in the noise","stay"],["Coat comes back. Choose a new path.","unbutton"],["All paths at once, looping","all"]]},
+stay:{k:"The hiss",t:"No coat. No reset. Shilpa's last kiss is still wet in the noise.\n\nNothing else to strip. You can sit here or open a door anyway.",c:[["Stay","stay"],["Open the coat anyway","unbutton"],["Restart the whole story","start"]]},
+all:{k:"Every option",t:"The story stops splitting.\n\nOne breath is Shilpa first. The next is Leia first. The next is meaner. The next is only static.\n\nThen buttons. Tear. Orbit. Aimee's phone. Not Aimee's body. Everyone else used in every way. Cum swapped. Five months in a night. Choose. Repeat.",c:[["Choose from the start again","unbutton"],["Jump to rotation","rotation"],["Jump to five months","months"],["Jump to static","static"]]}
+};
+const kicker=document.getElementById("kicker");
+const story=document.getElementById("story");
+const box=document.getElementById("choices");
+const note=document.getElementById("note");
+function go(id){
+  const scene=S[id]||S.start;
+  kicker.textContent=scene.k;
+  story.textContent=scene.t;
+  box.innerHTML="";
+  scene.c.forEach(function(pair,i){
+    const btn=document.createElement("button");
+    btn.type="button";
+    btn.innerHTML="<b>Choice "+(i+1)+"</b>"+pair[0];
+    btn.onclick=function(){go(pair[1]);window.scrollTo(0,0)};
+    box.appendChild(btn);
+  });
+  note.textContent="Scene: "+id+" • tap a choice";
+  try{localStorage.setItem("roomScene",id)}catch(e){}
+}
+document.getElementById("restartBtn").onclick=function(){go("start")};
+var saved=null;
+try{saved=localStorage.getItem("roomScene")}catch(e){}
+go(S[saved]?saved:"start");
+</script>
 </body>
 </html>
